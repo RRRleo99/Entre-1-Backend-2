@@ -1,43 +1,18 @@
-import express from 'express';
-import bcrypt from 'bcrypt';
-import User from '../models/user.js';
+import { Router } from 'express';
+import { getUsers, getUserById, updateUser, deleteUser } from '../controllers/users.controller.js';
 
-const router = express.Router();
+const router = Router();
 
-// Registro de usuario
-router.post('/register', async (req, res) => {
-  try {
-    const { first_name, last_name, email, age, password } = req.body;
+// listar todos los usuarios
+router.get('/', getUsers);
 
-    // Validación básica
-    if (!first_name || !last_name || !email || !age || !password) {
-      return res.status(400).json({ message: 'Faltan datos' });
-    }
+// obtener un usuario por ID
+router.get('/:id', getUserById);
 
-    // Verificar si el email ya existe
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: 'El email ya está registrado' });
-    }
+// actualizar un usuario por ID
+router.put('/:id', updateUser);
 
-    // Encriptar la contraseña
-    const hashedPassword = bcrypt.hashSync(password, 10);
-
-    // Crear el usuario
-    const newUser = new User({
-      first_name,
-      last_name,
-      email,
-      age,
-      password: hashedPassword
-    });
-
-    await newUser.save();
-
-    res.status(201).json({ message: 'Usuario registrado correctamente' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error al registrar usuario', error });
-  }
-});
+// eliminar un usuario por ID
+router.delete('/:id', deleteUser);
 
 export default router;
